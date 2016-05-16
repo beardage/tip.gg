@@ -90,6 +90,8 @@ App.propTypes = {
 };
 
 export default createContainer(() => {
+	Meteor.subscribe('tasks');
+
 	return {
 		tasks: Tasks.find({}, {
 			sort: {
