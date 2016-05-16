@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
-import { Meteor } from 'meteor/meteor';
+import {Meteor} from 'meteor/meteor';
 import {createContainer} from 'meteor/react-meteor-data';
 
 import {Tasks} from '../api/tasks.js';
@@ -27,10 +27,9 @@ class App extends Component {
 		Meteor.call('tasks.insert', text);
 
 		Tasks.insert({
-			text,
-			createdAt: new Date(), // current time
-			owner: Meteor.userId(),           // _id of logged in user
-      		username: Meteor.user().username,  // username of logged in user
+			text, createdAt: new Date(), // current time
+			owner: Meteor.userId(), // _id of logged in user
+			username: Meteor.user().username, // username of logged in user
 		});
 
 		// Clear form
@@ -48,7 +47,12 @@ class App extends Component {
 		if (this.state.hideCompleted) {
 			filteredTasks = filteredTasks.filter(task => !task.checked);
 		}
-		return filteredTasks.map((task) => (<Task key={task._id} task={task}/>));
+		return filteredTasks.map((task) => {
+			const currentUserId = this.props.currentUser && this.props.currentUser._id;
+			const showPrivateButton = task.owner === currentUserId;
+
+			return (<Task key={task._id} task={task} showPrivateButton={showPrivateButton}/>);
+		});
 	}
 
 	render() {
@@ -62,17 +66,12 @@ class App extends Component {
 						Hide Completed Tasks
 					</label>
 
-					<AccountsUIWrapper />
-
-					{ this.props.currentUser ?
-			            <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
-			              <input
-			                type="text"
-			                ref="textInput"
-			                placeholder="Type to add new tasks"
-			              />
-			            </form> : ''
-			        }
+					<AccountsUIWrapper/> {this.props.currentUser
+						? <form className="new-task" onSubmit={this.handleSubmit.bind(this)}>
+								<input type="text" ref="textInput" placeholder="Type to add new tasks"/>
+							</form>
+						: ''
+}
 				</header>
 
 				<ul>
@@ -86,7 +85,7 @@ class App extends Component {
 App.propTypes = {
 	tasks: PropTypes.array.isRequired,
 	incompleteCount: PropTypes.number.isRequired,
-	currentUser: PropTypes.object,
+	currentUser: PropTypes.object
 };
 
 export default createContainer(() => {
@@ -103,6 +102,6 @@ export default createContainer(() => {
 				$ne: true
 			}
 		}).count(),
-		currentUser: Meteor.user(),
+		currentUser: Meteor.user()
 	};
 }, App);

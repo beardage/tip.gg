@@ -10,7 +10,14 @@ if (Meteor.isServer) {
     return Tasks.find();
   });
 }
- 
+
+if (Meteor.isServer) {
+  // This code only runs on the server
+  Meteor.publish('tasks', function tasksPublication() {
+    return Tasks.find();
+  });
+}
+
 
 Meteor.methods({
   'tasks.insert'(text) {
